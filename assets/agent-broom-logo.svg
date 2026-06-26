@@ -23,19 +23,21 @@
       <rect x="14" y="14" width="484" height="484" rx="112" fill="white"/>
       <g transform="rotate(-36 256 256)" fill="black">
         <rect x="245" y="88" width="26" height="268" rx="13"/>
-        <rect x="224" y="336" width="68" height="28" rx="14"/>
-        <path d="M184 361C184 349.954 192.954 341 204 341H312C323.046 341 332 349.954 332 361V395C332 408.255 321.255 419 308 419H208C194.745 419 184 408.255 184 395V361Z"/>
-        <path d="M192 397H324L306 440C302.288 448.882 293.603 454.667 283.977 454.667H232.023C222.397 454.667 213.712 448.882 210 440L192 397Z"/>
-        <path d="M217 401L228 453"/>
-        <path d="M248 399L251 456"/>
-        <path d="M279 399L271 456"/>
-        <path d="M306 401L292 451"/>
+        <rect x="239" y="322" width="38" height="60" rx="19"/>
+        <path d="M194 358C205 342 229 337 247 350C254 335 276 330 290 345C310 338 330 350 335 372C353 383 351 411 331 423C323 448 295 453 278 435C262 453 233 449 224 428C199 430 181 409 188 386C179 377 184 365 194 358Z"/>
+        <path d="M217 386C204 402 203 423 211 444C224 435 227 414 217 386Z"/>
+        <path d="M243 377C233 401 235 427 247 450C259 427 258 399 243 377Z"/>
+        <path d="M272 376C266 402 270 428 286 448C294 423 289 397 272 376Z"/>
+        <path d="M302 386C309 407 306 429 295 447C318 431 323 405 302 386Z"/>
       </g>
     </mask>
   </defs>
 
   <rect x="14" y="14" width="484" height="484" rx="112" fill="url(#glass)" filter="url(#soft-shadow)" mask="url(#broom-cutout)"/>
   <rect x="23" y="23" width="466" height="466" rx="103" stroke="url(#edge)" stroke-width="4" filter="url(#frost)" mask="url(#broom-cutout)"/>
-  <path d="M88 86C127 60 199 49 265 59" stroke="#FFFDF8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round"/>
-  <path d="M82 406C133 459 229 477 333 452" stroke="#B35C1D" stroke-opacity="0.25" stroke-width="9" stroke-linecap="round"/>
+  <g transform="rotate(-36 256 256)" stroke="#21170F" stroke-width="9" stroke-linecap="round" stroke-opacity="0.82">
+    <path d="M236 340C222 358 213 378 207 402"/>
+    <path d="M258 344C257 368 257 393 258 418"/>
+    <path d="M279 340C293 360 303 382 310 407"/>
+  </g>
 </svg>
