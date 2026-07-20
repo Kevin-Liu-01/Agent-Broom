@@ -5,7 +5,7 @@
 <h1 align="center">Agent Broom</h1>
 
 <p align="center">
-  A ports/process cleanup CLI that agents can safely call.
+  Ports first. Cleanup second. Safe for agents to call.
 </p>
 
 <p align="center">
@@ -19,6 +19,13 @@ artifacts, and dev caches. It starts with the same simple job that made
 answer "what is running on my ports?" quickly, then expose safe cleanup actions
 that an agent can call.
 
+```bash
+agent-broom ports --json
+agent-broom port 3000 --json
+agent-broom kill 3000-3010        # dry run
+agent-broom stop --kill           # only recorded agent-owned process groups
+```
+
 The design is intentionally split:
 
 - **The skill is memory.** It tells the agent when to run cleanup.
@@ -28,6 +35,10 @@ No giant prompt cleanup ritual. No guessing from `ps` after the fact. Run the
 CLI, inspect the dry run, then choose whether to apply anything.
 
 ## Port Checker First
+
+Agent Broom is intentionally useful before you install any agent skill. It can
+stand alone as a small CLI for answering "what owns this port?" and "what can I
+safely clean up?"
 
 ```bash
 agent-broom ports
@@ -54,6 +65,19 @@ whoisonport 3000
 shape but adds agent safety: JSON output, dry-run kills by default, a process
 ledger, protected MCP/editor rules, artifact cleanup, and repo-scoped stop/prune
 commands.
+
+## Why Agents Need This
+
+Agents are good at starting servers and bad at remembering every process they
+started. Agent Broom gives them a deterministic loop:
+
+1. Audit ports before work.
+2. Record long-running processes when they start.
+3. Inspect dry-run cleanup before acting.
+4. Stop only owned process groups.
+5. Re-audit before ending the task.
+
+That loop is script-backed, not prompt magic.
 
 ## Install
 
@@ -135,6 +159,17 @@ another server on `localhost:3000`.
 
 Agent Broom protects editors, Codex, shells, and shared MCP servers such as
 `playwright-mcp` and `chrome-devtools-mcp`.
+
+## Tested Agent Flow
+
+The CLI has been tested as an agent harness:
+
+- start a temporary localhost server;
+- record it with `agent-broom add`;
+- inspect it with `agent-broom port <port> --json`;
+- dry-run `agent-broom stop`;
+- apply `agent-broom stop --kill`;
+- verify the port is gone.
 
 ## Agent JSON Contracts
 
