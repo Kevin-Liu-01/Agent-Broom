@@ -16,6 +16,8 @@ shopt -s nocasematch
 
 PROTECT_RE='Cursor|Code Helper|Electron|/MacOS/Code|Codex|codex|ChatGPT\.app|cua_node|node_repl|extension-host|chrome-devtools-mcp|playwright-mcp|@playwright/mcp|cursor-server|(^|/)mcp/|mcp/server\.mjs'
 SELF_PGID="$(ps -o pgid= -p "$$" 2>/dev/null | tr -d ' ')"
+DOCKER_PORT_MAP_LOADED=0
+DOCKER_PORT_MAP=""
 
 usage() {
   sed -n '2,15p' "$0"
@@ -123,6 +125,49 @@ framework_for() {
   esac
 }
 
+framework_from_image() {
+  local image="$1"
+  case "$image" in
+    *postgres*) echo "PostgreSQL" ;;
+    *redis*) echo "Redis" ;;
+    *mysql*|*mariadb*) echo "MySQL" ;;
+    *mongo*) echo "MongoDB" ;;
+    *localstack*) echo "LocalStack" ;;
+    *nginx*) echo "nginx" ;;
+    *rabbitmq*) echo "RabbitMQ" ;;
+    *kafka*) echo "Kafka" ;;
+    *elastic*) echo "Elasticsearch" ;;
+    *minio*) echo "MinIO" ;;
+    *) echo "Docker" ;;
+  esac
+}
+
+load_docker_port_map() {
+  local line ports name image rest host
+  [ "$DOCKER_PORT_MAP_LOADED" -eq 1 ] && return
+  DOCKER_PORT_MAP_LOADED=1
+  has docker || return
+  while IFS=$'\t' read -r ports name image; do
+    [ -n "$ports" ] && [ -n "$name" ] || continue
+    rest="$ports"
+    while [[ "$rest" =~ :([0-9]+)-\> ]]; do
+      host="${BASH_REMATCH[1]}"
+      DOCKER_PORT_MAP="${DOCKER_PORT_MAP}${host}"$'\t'"${name}"$'\t'"${image}"$'\n'
+      rest="${rest#*"${BASH_REMATCH[0]}"}"
+    done
+  done < <(docker ps --format '{{.Ports}}\t{{.Names}}\t{{.Image}}' 2>/dev/null || true)
+}
+
+docker_info_for_port() {
+  local want="$1" port name image
+  load_docker_port_map
+  [ -n "$DOCKER_PORT_MAP" ] || return 1
+  while IFS=$'\t' read -r port name image; do
+    [ "$port" = "$want" ] && { printf '%s\t%s\n' "$name" "$image"; return 0; }
+  done <<< "$DOCKER_PORT_MAP"
+  return 1
+}
+
 listeners() {
   if ! has lsof; then
     echo "lsof is required for port inspection" >&2
@@ -139,6 +184,7 @@ listeners() {
 
 emit_port_rows() {
   local show_all="$1" row port name pid user addr cmd ppid pgid stat cpu rss etime cwd root project framework status
+  local docker_info docker_name docker_image
   while IFS=$'\t' read -r port name pid user addr; do
     [ -n "${pid:-}" ] || continue
     cmd="$(command_for "$pid")"
@@ -155,6 +201,15 @@ emit_port_rows() {
     root="$(project_root_for "$cwd")"
     project="$(project_name_for "$root")"
     framework="$(framework_for "$name" "$cmd" "$root")"
+    docker_info="$(docker_info_for_port "$port" || true)"
+    if [ -n "$docker_info" ]; then
+      docker_name="${docker_info%%$'\t'*}"
+      docker_image="${docker_info#*$'\t'}"
+      name="docker"
+      project="$docker_name"
+      framework="$(framework_from_image "$docker_image")"
+      root=""
+    fi
     status="healthy"
     printf '%s\n' "$stat" | grep -q Z && status="zombie"
     if [ "${ppid:-0}" = "1" ] && is_dev_process "$name" "$cmd"; then status="orphaned"; fi
