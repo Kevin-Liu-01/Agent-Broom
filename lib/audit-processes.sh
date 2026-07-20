@@ -19,7 +19,7 @@ set -uo pipefail
 # --- constants ---------------------------------------------------------------
 # Never signal these: editors, agent runtimes, and IDE-managed MCP servers whose
 # death breaks live tool connections in this or other sessions.
-PROTECT_RE='Cursor|Code Helper|Electron|/MacOS/Code|Codex|node_repl|extension-host|chrome-devtools-mcp|playwright-mcp|@playwright/mcp|cursor-server'
+PROTECT_RE='Cursor|Code Helper|Electron|/MacOS/Code|Codex|codex|ChatGPT\.app|cua_node|node_repl|extension-host|chrome-devtools-mcp|playwright-mcp|@playwright/mcp|cursor-server|(^|/)mcp/|mcp/server\.mjs'
 
 # Category patterns (extended regex, matched against the full command string).
 TESTS_RE='vitest|jest|mocha|jasmine|ava |pnpm test|npm test|yarn test|vitest run|pnpm exec vitest'

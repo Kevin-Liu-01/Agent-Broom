@@ -12,7 +12,7 @@
 set -uo pipefail
 
 LEDGER="${AGENT_PROCESS_LEDGER:-${XDG_CACHE_HOME:-$HOME/.cache}/agent-processes/ledger.tsv}"
-PROTECT_RE='Cursor|Code Helper|Electron|/MacOS/Code|Codex|node_repl|extension-host|chrome-devtools-mcp|playwright-mcp|@playwright/mcp|cursor-server'
+PROTECT_RE='Cursor|Code Helper|Electron|/MacOS/Code|Codex|codex|ChatGPT\.app|cua_node|node_repl|extension-host|chrome-devtools-mcp|playwright-mcp|@playwright/mcp|cursor-server|(^|/)mcp/|mcp/server\.mjs'
 SELF_PGID="$(ps -o pgid= -p "$$" 2>/dev/null | tr -d ' ')"
 
 usage() {

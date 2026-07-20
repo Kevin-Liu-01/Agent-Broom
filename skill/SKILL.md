@@ -5,8 +5,18 @@ description: Remember to run Agent Broom, the script-backed process tracking, au
 
 # Agent Broom
 
-This skill is the memory hook. It exists so agents remember to run the script.
-The deterministic cleanup behavior lives in `bin/agent-broom` and `lib/*.sh`.
+This skill is the memory hook. It exists so agents remember to run the CLI.
+The deterministic cleanup behavior lives in `bin/agent-broom`, `bin/ports`,
+`bin/whoisonport`, and `lib/*.sh`.
+
+Start with the port checker surface when the user asks what is running or when a
+localhost port may be occupied:
+
+```bash
+bin/agent-broom ports --json
+bin/agent-broom port <PORT> --json
+bin/agent-broom ps --json
+```
 
 Run a dry-run audit first:
 
@@ -29,6 +39,10 @@ bin/agent-broom audit
 Only act after reviewing the dry run:
 
 ```bash
+bin/agent-broom kill <PORT|PID|RANGE>
+bin/agent-broom kill --apply <PORT|PID|RANGE>
+bin/agent-broom clean
+bin/agent-broom clean --apply
 bin/agent-broom stop --kill
 bin/agent-broom artifacts --clean
 bin/agent-broom devclean --apply

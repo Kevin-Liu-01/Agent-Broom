@@ -5,7 +5,7 @@
 <h1 align="center">Agent Broom</h1>
 
 <p align="center">
-  A skill that makes agents remember to run a cleanup script.
+  A ports/process cleanup CLI that agents can safely call.
 </p>
 
 <p align="center">
@@ -14,7 +14,10 @@
 
 Agent Broom is for the boring mess that coding agents leave behind: localhost
 servers, test watchers, orphaned MCP processes, browser automation, build
-artifacts, and dev caches.
+artifacts, and dev caches. It starts with the same simple job that made
+[port-whisperer](https://github.com/LarsenCundric/port-whisperer) useful:
+answer "what is running on my ports?" quickly, then expose safe cleanup actions
+that an agent can call.
 
 The design is intentionally split:
 
@@ -22,7 +25,35 @@ The design is intentionally split:
 - **The script is machinery.** It audits, reports, and only acts after review.
 
 No giant prompt cleanup ritual. No guessing from `ps` after the fact. Run the
-script, inspect the dry run, then choose whether to apply anything.
+CLI, inspect the dry run, then choose whether to apply anything.
+
+## Port Checker First
+
+```bash
+agent-broom ports
+agent-broom ports --all
+agent-broom ports --json
+agent-broom port 3000 --json
+agent-broom ps
+agent-broom ps --json
+agent-broom kill 3000-3010        # dry run
+agent-broom kill --apply 3000     # terminate listener/process group
+agent-broom logs 3000 --lines 25
+agent-broom clean                 # dry run orphan/zombie dev listeners
+agent-broom watch
+```
+
+Short aliases are installed too:
+
+```bash
+ports
+whoisonport 3000
+```
+
+`port-whisperer` optimizes for a polished human table. Agent Broom keeps that
+shape but adds agent safety: JSON output, dry-run kills by default, a process
+ledger, protected MCP/editor rules, artifact cleanup, and repo-scoped stop/prune
+commands.
 
 ## Install
 
@@ -51,6 +82,13 @@ agent-broom audit
 ```bash
 agent-broom list
 agent-broom audit
+agent-broom ports [--all] [--json]
+agent-broom port <PORT> [--json]
+agent-broom ps [--all] [--json]
+agent-broom kill [--apply] [--force] <PORT|PID|RANGE>...
+agent-broom logs <PORT|PID> [--lines N] [--follow]
+agent-broom clean [--apply] [--json]
+agent-broom watch [--interval SEC]
 agent-broom add --pid <PID> --kind dev --port <PORT> --purpose "<why>" -- <command>
 agent-broom stop
 agent-broom stop --kill
@@ -65,10 +103,11 @@ agent-broom devclean --apply
 agent-broom doctor
 ```
 
-Everything risky is dry-run first. `stop` reports what it would stop unless you
-pass `--kill`. `artifacts` reports reclaimable build/cache output unless you
-pass `--clean`. `devclean` reports safe orphan/deep/optimize/disk targets unless
-you pass `--apply`.
+Everything risky is dry-run first. `kill` and `clean` report what they would
+terminate unless you pass `--apply`. `stop` reports what it would stop unless
+you pass `--kill`. `artifacts` reports reclaimable build/cache output unless
+you pass `--clean`. `devclean` reports safe orphan/deep/optimize/disk targets
+unless you pass `--apply`.
 
 ## What It Tracks
 
@@ -86,6 +125,7 @@ another server on `localhost:3000`.
 
 `agent-broom audit` reports:
 
+- active localhost listeners with project/framework/process context
 - recorded agent-owned processes
 - localhost listeners that look like dev servers
 - test/watch runners such as Vitest and Jest
@@ -95,6 +135,20 @@ another server on `localhost:3000`.
 
 Agent Broom protects editors, Codex, shells, and shared MCP servers such as
 `playwright-mcp` and `chrome-devtools-mcp`.
+
+## Agent JSON Contracts
+
+Use JSON when another agent or script needs deterministic parsing:
+
+```bash
+agent-broom ports --json
+agent-broom port 3000 --json
+agent-broom ps --json
+agent-broom clean --json
+```
+
+Successful JSON responses use `{ "ok": true, ... }`; missing ports use
+`{ "ok": false, "error": { "code": "port_not_found", ... } }`.
 
 ## Devclean Mode
 

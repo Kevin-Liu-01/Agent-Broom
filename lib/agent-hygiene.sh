@@ -6,6 +6,11 @@
 # Usage:
 #   agent-hygiene.sh list
 #   agent-hygiene.sh audit
+#   agent-hygiene.sh ports [--all] [--json]
+#   agent-hygiene.sh port <port> [--json]
+#   agent-hygiene.sh kill [--apply] <port|pid|range>...
+#   agent-hygiene.sh ps [--all] [--json]
+#   agent-hygiene.sh clean [--apply]
 #   agent-hygiene.sh add --pid 123 --kind dev --port 3000 --purpose "verify UI" -- pnpm dev website
 #   agent-hygiene.sh stop [--kill]
 #   agent-hygiene.sh artifacts [clean-artifacts args...]
@@ -39,6 +44,27 @@ case "$cmd" in
   audit)
     "$DIR/process-ledger.sh" list "$@"
     "$DIR/audit-processes.sh"
+    ;;
+  ports)
+    exec "$DIR/ports.sh" "$@"
+    ;;
+  port)
+    exec "$DIR/ports.sh" "$@"
+    ;;
+  kill)
+    exec "$DIR/ports.sh" kill "$@"
+    ;;
+  ps)
+    exec "$DIR/ports.sh" ps "$@"
+    ;;
+  clean)
+    exec "$DIR/ports.sh" clean "$@"
+    ;;
+  logs)
+    exec "$DIR/ports.sh" logs "$@"
+    ;;
+  watch)
+    exec "$DIR/ports.sh" watch "$@"
     ;;
   artifacts)
     exec "$DIR/clean-artifacts.sh" "$@"
